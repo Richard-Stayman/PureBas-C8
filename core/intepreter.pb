@@ -122,7 +122,7 @@ Procedure intepreter_NextOpcode()
                       screen_pwidth = 128
                       screen_pheight = 64
                       screen_ClearScreen()
-                      MessageRequester("MegaMadness","WHO activated megachip?! I don´t even..")
+                      MessageRequester("MegaMadness","WHO activated megachip?! I donÂ´t even..")
                   EndSelect
                   
                 Case "B"                                              ; Scroll display Value lines up
@@ -299,93 +299,59 @@ Procedure intepreter_NextOpcode()
             Case "1"                                                  ; Set RV to RV "or" an other RV
               op_understood = #True
               intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) | intepreter_GPR_RV(Hex2Dec(op_i3))
+              intepreter_GPR_RV(15) = 0
             Case "2"                                                  ; Set RV to RV "and" an other RV
               op_understood = #True
               intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) & intepreter_GPR_RV(Hex2Dec(op_i3))
+              intepreter_GPR_RV(15) = 0
             Case "3"                                                  ; Set RV to RV "Xor" an other RV
               op_understood = #True
               intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) ! intepreter_GPR_RV(Hex2Dec(op_i3))
+              intepreter_GPR_RV(15) = 0
             Case "4"                                                  ; Add RV to an other RV. RV(15) is set to 1 when there's a carry, And To 0 when there isn't
               op_understood = #True
-              vx.a = intepreter_GPR_RV(Hex2Dec(op_i2))
-              vy.a = intepreter_GPR_RV(Hex2Dec(op_i3))
-              
-              ! MOV AL, [p.v_vx]
-              ! ADD byte [p.v_vy], AL
-              ! JC ll_intepreter_nextopcode_op8xx4_carry
-              
-              ; NO CARRY:
-              intepreter_GPR_RV(15) = 0
-              Goto OP8XX4_FINISH
-              
-              OP8XX4_CARRY:
-              intepreter_GPR_RV(15) = 1
-              Goto OP8XX4_FINISH
-              
-              OP8XX4_FINISH:
-              intepreter_GPR_RV(Hex2Dec(op_i2)) = vy ; result
+              intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) + intepreter_GPR_RV(Hex2Dec(op_i3))
+              If intepreter_GPR_RV(Hex2Dec(op_i3)) <= intepreter_GPR_RV(Hex2Dec(op_i2))
+                intepreter_GPR_RV(15) = 0
+              Else
+                intepreter_GPR_RV(15) = 1
+                EndIf
               
             Case "5"                                                  ; Subtract an other RV from RV. RV(15) is set to 0 when there's a borrow, and to 1 when there isn't
-              op_understood = #True
-              vx.a = intepreter_GPR_RV(Hex2Dec(op_i3))
-              vy.a = intepreter_GPR_RV(Hex2Dec(op_i2))
+              op_understood = #True     
+ 
+              If intepreter_GPR_RV(Hex2Dec(op_i2)) >= intepreter_GPR_RV(Hex2Dec(op_i3))
+                temp = 1
+              Else
+                temp = 0 
+              EndIf
+              intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) - intepreter_GPR_RV(Hex2Dec(op_i3))
+              intepreter_GPR_RV(15) = temp
               
-              ! MOV AL, [p.v_vx]
-              ! SUB byte [p.v_vy], AL
-              ! JC ll_intepreter_nextopcode_op8xx5_carry
-              
-              ; NO CARRY:
-              intepreter_GPR_RV(15) = 1
-              Goto OP8XX5_FINISH
-              
-              OP8XX5_CARRY:
-              intepreter_GPR_RV(15) = 0
-              Goto OP8XX5_FINISH
-              
-              OP8XX5_FINISH:
-              intepreter_GPR_RV(Hex2Dec(op_i2)) = vy ; result
 
             Case "6"                                                  ; Shift RV right by one. RV(15) is set to the value of the least significant bit of RV before the shift
               op_understood = #True
-              vx.a = intepreter_GPR_RV(Hex2Dec(op_i2))
-              intepreter_GPR_RV(15) = intepreter_GPR_RV(Hex2Dec(op_i2)) & %00000001
-              
-              ! MOV AL, [p.v_vx]
-              ! SHR AL, 1
-              ! MOV byte [p.v_vx], AL
-              
-              intepreter_GPR_RV(Hex2Dec(op_i2)) = vx ; result
+              intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i3))
+              temp = intepreter_GPR_RV(Hex2Dec(op_i2)) & %00000001
+              intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) >> 1
+              intepreter_GPR_RV(15) = temp
               
             Case "7"                                                  ; Sets RV to RV minus other RV. RV(15) is set to 0 when there's a borrow, and 1 when there isn't.
               op_understood = #True
-              vx.a = intepreter_GPR_RV(Hex2Dec(op_i2))
-              vy.a = intepreter_GPR_RV(Hex2Dec(op_i3))
-              
-              ! MOV AL, [p.v_vx]
-              ! SUB byte [p.v_vy], AL
-              ! JC ll_intepreter_nextopcode_op8xx7_carry
-              
-              ; NO CARRY:
-              intepreter_GPR_RV(15) = 1
-              Goto OP8XX7_FINISH
-              
-              OP8XX7_CARRY:
-              intepreter_GPR_RV(15) = 0
-              Goto OP8XX7_FINISH
-              
-              OP8XX7_FINISH:
-              intepreter_GPR_RV(Hex2Dec(op_i2)) = vy ; result
+              intepreter_GPR_RV(Hex2Dec(op_i2)) =  intepreter_GPR_RV(Hex2Dec(op_i3)) - intepreter_GPR_RV(Hex2Dec(op_i2))        
+              If intepreter_GPR_RV(Hex2Dec(op_i3)) > intepreter_GPR_RV(Hex2Dec(op_i2))
+                intepreter_GPR_RV(15) = 1
+              Else
+                intepreter_GPR_RV(15) = 0
+              EndIf
               
             Case "E"                                                  ; Shift RV left by one. RV(15) is set to the value of the most significant bit of RV before the shift
               op_understood = #True
-              vx.a = intepreter_GPR_RV(Hex2Dec(op_i2))
-              intepreter_GPR_RV(15) = Bool((intepreter_GPR_RV(Hex2Dec(op_i2)) & %10000000) > 0)
+              intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i3))
+              temp = intepreter_GPR_RV(Hex2Dec(op_i2))
+              intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) << 1
+              intepreter_GPR_RV(15) = Bool((temp & %10000000) > 0)
               
-              ! MOV AL, [p.v_vx]
-              ! SHL AL, 1
-              ! MOV byte [p.v_vx], AL
-              
-              intepreter_GPR_RV(Hex2Dec(op_i2)) = vx ; result
           EndSelect
           
         Case "9"                                                      ; Skip the next instruction if RV doesn't equal other RV
