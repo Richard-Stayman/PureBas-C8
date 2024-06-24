@@ -319,7 +319,6 @@ Procedure intepreter_NextOpcode()
               
             Case "5"                                                  ; Subtract an other RV from RV. RV(15) is set to 0 when there's a borrow, and to 1 when there isn't
               op_understood = #True     
- 
               If intepreter_GPR_RV(Hex2Dec(op_i2)) >= intepreter_GPR_RV(Hex2Dec(op_i3))
                 temp = 1
               Else
@@ -328,7 +327,6 @@ Procedure intepreter_NextOpcode()
               intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) - intepreter_GPR_RV(Hex2Dec(op_i3))
               intepreter_GPR_RV(15) = temp
               
-
             Case "6"                                                  ; Shift RV right by one. RV(15) is set to the value of the least significant bit of RV before the shift
               op_understood = #True
               intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i3))
@@ -338,13 +336,13 @@ Procedure intepreter_NextOpcode()
               
             Case "7"                                                  ; Sets RV to RV minus other RV. RV(15) is set to 0 when there's a borrow, and 1 when there isn't.
               op_understood = #True
-              intepreter_GPR_RV(Hex2Dec(op_i2)) =  intepreter_GPR_RV(Hex2Dec(op_i3)) - intepreter_GPR_RV(Hex2Dec(op_i2))        
-              If intepreter_GPR_RV(Hex2Dec(op_i3)) > intepreter_GPR_RV(Hex2Dec(op_i2))
-                intepreter_GPR_RV(15) = 1
+              If intepreter_GPR_RV(Hex2Dec(op_i3)) >= intepreter_GPR_RV(Hex2Dec(op_i2)) 
+                temp = 1
               Else
-                intepreter_GPR_RV(15) = 0
+                temp = 0
               EndIf
-              
+              intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i3)) - intepreter_GPR_RV(Hex2Dec(op_i2))
+              intepreter_GPR_RV(15) = temp
             Case "E"                                                  ; Shift RV left by one. RV(15) is set to the value of the most significant bit of RV before the shift
               op_understood = #True
               intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i3))
@@ -622,9 +620,9 @@ Procedure intepreter_NextOpcode()
                          ;This undocumented feature of the Chip-8 And used by Spacefight 2019! 
                          ;game.
                   If intepreter_SPR_I >= 4096
-                    intepreter_GPR_RV(15)=1
-                  Else
                     intepreter_GPR_RV(15)=0
+                  Else
+                    intepreter_GPR_RV(15)=1
                   EndIf
               EndSelect
               
