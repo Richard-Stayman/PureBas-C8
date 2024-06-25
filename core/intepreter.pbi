@@ -34,6 +34,7 @@
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ;>> Definition of procedures     >>
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Declare Min()
 Declare intepreter_ResetIntepreter()
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ;>> Opcode intepreter            >>
@@ -148,8 +149,7 @@ Declare intepreter_NextOpcode()
 ;           intepreter_GPR_RV(i) - 256
 ;         Wend
 ;       Next
-; IDE Options = PureBasic 5.31 (Windows - x86)
-; CursorPosition = 712
-; FirstLine = 675
-; Folding = -
+; IDE Options = PureBasic 6.04 LTS (Windows - x64)
+; CursorPosition = 36
+; FirstLine = 12
 ; EnableXP
