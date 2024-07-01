@@ -393,7 +393,11 @@ Procedure intepreter_NextOpcode()
           intepreter_SPR_I = Hex2Dec(op_i2+op_i3+op_i4)
         Case "B"                                                      ; Jump to an address plus RV(0)
           op_understood = #True
-          intepreter_SPR_PC = Hex2Dec(op_i2+op_i3+op_i4) + intepreter_GPR_RV(0)
+          If quirks = 0 
+             intepreter_SPR_PC = Hex2Dec(op_i2+op_i3+op_i4) + intepreter_GPR_RV(Hex2Dec(op_i2))
+          Else
+             intepreter_SPR_PC = Hex2Dec(op_i2+op_i3+op_i4) + intepreter_GPR_RV(0)
+          EndIf
           ; Don't go to next opcode
           intepreter_SkipOpcode = #True
         Case "C"                                                      ; Set RV to a random number and Value
