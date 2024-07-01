@@ -44,11 +44,21 @@ Global intepreter_SPR_DT.d                      ;Delay timer, while > 0 delay ex
 Global intepreter_SPR_ST                        ;Sound timer, while > 0 play sound
 Global intepreter_SPR_SPRW                      ;Sprite width, used in megachip
 Global intepreter_SPR_SPRH                      ;Sprite height, used in megachip
+Global quirks ;quirks setting
 
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ;>> Definition of procedures     >>
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+Procedure Min(a, b)
+  If a < b
+    ProcedureReturn a
+  Else
+    ProcedureReturn b
+  EndIf
+EndProcedure
+      
 
 Procedure intepreter_ResetIntepreter()
   intepreter_SPR_PC = 512                       ;Holds the memory address of the current CPU instruction, reset to 512
@@ -80,7 +90,7 @@ EndProcedure
 
 Procedure intepreter_NextOpcode()
   
-    If intepreter_SPR_DT.d <= 0 ; Only inteprets next command if delay timer finished
+;    If intepreter_SPR_DT.d <= 0 ; Only inteprets next command if delay timer finished
     
       ; Create Hex value out of 2 bytes, with a length of 4 character 'FF0A'
       ino_opcode.s = RSet(Hex(memory_GetValue(intepreter_SPR_PC)), 2, "0")+RSet(Hex(memory_GetValue(intepreter_SPR_PC+1)), 2, "0")
@@ -122,7 +132,7 @@ Procedure intepreter_NextOpcode()
                       screen_pwidth = 128
                       screen_pheight = 64
                       screen_ClearScreen()
-                      MessageRequester("MegaMadness","WHO activated megachip?! I don´t even..")
+                      MessageRequester("MegaMadness","WHO activated megachip?! I donÂ´t even..")
                   EndSelect
                   
                 Case "B"                                              ; Scroll display Value lines up
@@ -299,93 +309,77 @@ Procedure intepreter_NextOpcode()
             Case "1"                                                  ; Set RV to RV "or" an other RV
               op_understood = #True
               intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) | intepreter_GPR_RV(Hex2Dec(op_i3))
+              If quirks = 0 ;VF reset quirk
+                intepreter_GPR_RV(15) = intepreter_GPR_RV(15)
+              Else
+                intepreter_GPR_RV(15) = 0
+                EndIf
             Case "2"                                                  ; Set RV to RV "and" an other RV
               op_understood = #True
               intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) & intepreter_GPR_RV(Hex2Dec(op_i3))
+              If quirks = 0 ;VF reset quirk
+                intepreter_GPR_RV(15) = intepreter_GPR_RV(15)
+              Else
+                intepreter_GPR_RV(15) = 0
+                EndIf
             Case "3"                                                  ; Set RV to RV "Xor" an other RV
               op_understood = #True
               intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) ! intepreter_GPR_RV(Hex2Dec(op_i3))
+              If quirks = 0 ;VF reset quirk
+                intepreter_GPR_RV(15) = intepreter_GPR_RV(15)
+              Else
+                intepreter_GPR_RV(15) = 0
+                EndIf
             Case "4"                                                  ; Add RV to an other RV. RV(15) is set to 1 when there's a carry, And To 0 when there isn't
               op_understood = #True
-              vx.a = intepreter_GPR_RV(Hex2Dec(op_i2))
-              vy.a = intepreter_GPR_RV(Hex2Dec(op_i3))
-              
-              ! MOV AL, [p.v_vx]
-              ! ADD byte [p.v_vy], AL
-              ! JC ll_intepreter_nextopcode_op8xx4_carry
-              
-              ; NO CARRY:
-              intepreter_GPR_RV(15) = 0
-              Goto OP8XX4_FINISH
-              
-              OP8XX4_CARRY:
-              intepreter_GPR_RV(15) = 1
-              Goto OP8XX4_FINISH
-              
-              OP8XX4_FINISH:
-              intepreter_GPR_RV(Hex2Dec(op_i2)) = vy ; result
+              intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) + intepreter_GPR_RV(Hex2Dec(op_i3))
+              If intepreter_GPR_RV(Hex2Dec(op_i3)) <= intepreter_GPR_RV(Hex2Dec(op_i2))
+                intepreter_GPR_RV(15) = 0
+              Else
+                intepreter_GPR_RV(15) = 1
+                EndIf
               
             Case "5"                                                  ; Subtract an other RV from RV. RV(15) is set to 0 when there's a borrow, and to 1 when there isn't
-              op_understood = #True
-              vx.a = intepreter_GPR_RV(Hex2Dec(op_i3))
-              vy.a = intepreter_GPR_RV(Hex2Dec(op_i2))
+              op_understood = #True     
+              If intepreter_GPR_RV(Hex2Dec(op_i2)) >= intepreter_GPR_RV(Hex2Dec(op_i3))
+                temp = 1
+              Else
+                temp = 0 
+              EndIf
+              intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) - intepreter_GPR_RV(Hex2Dec(op_i3))
+              intepreter_GPR_RV(15) = temp
               
-              ! MOV AL, [p.v_vx]
-              ! SUB byte [p.v_vy], AL
-              ! JC ll_intepreter_nextopcode_op8xx5_carry
-              
-              ; NO CARRY:
-              intepreter_GPR_RV(15) = 1
-              Goto OP8XX5_FINISH
-              
-              OP8XX5_CARRY:
-              intepreter_GPR_RV(15) = 0
-              Goto OP8XX5_FINISH
-              
-              OP8XX5_FINISH:
-              intepreter_GPR_RV(Hex2Dec(op_i2)) = vy ; result
-
             Case "6"                                                  ; Shift RV right by one. RV(15) is set to the value of the least significant bit of RV before the shift
               op_understood = #True
-              vx.a = intepreter_GPR_RV(Hex2Dec(op_i2))
-              intepreter_GPR_RV(15) = intepreter_GPR_RV(Hex2Dec(op_i2)) & %00000001
-              
-              ! MOV AL, [p.v_vx]
-              ! SHR AL, 1
-              ! MOV byte [p.v_vx], AL
-              
-              intepreter_GPR_RV(Hex2Dec(op_i2)) = vx ; result
+              If quirks = 0
+                intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2))
+              Else
+                intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i3))
+                EndIf
+              temp = intepreter_GPR_RV(Hex2Dec(op_i2)) & %00000001
+              intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) >> 1
+              intepreter_GPR_RV(15) = temp
               
             Case "7"                                                  ; Sets RV to RV minus other RV. RV(15) is set to 0 when there's a borrow, and 1 when there isn't.
               op_understood = #True
-              vx.a = intepreter_GPR_RV(Hex2Dec(op_i2))
-              vy.a = intepreter_GPR_RV(Hex2Dec(op_i3))
-              
-              ! MOV AL, [p.v_vx]
-              ! SUB byte [p.v_vy], AL
-              ! JC ll_intepreter_nextopcode_op8xx7_carry
-              
-              ; NO CARRY:
-              intepreter_GPR_RV(15) = 1
-              Goto OP8XX7_FINISH
-              
-              OP8XX7_CARRY:
-              intepreter_GPR_RV(15) = 0
-              Goto OP8XX7_FINISH
-              
-              OP8XX7_FINISH:
-              intepreter_GPR_RV(Hex2Dec(op_i2)) = vy ; result
-              
+              If intepreter_GPR_RV(Hex2Dec(op_i3)) >= intepreter_GPR_RV(Hex2Dec(op_i2)) 
+                temp = 1
+              Else
+                temp = 0
+              EndIf
+              intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i3)) - intepreter_GPR_RV(Hex2Dec(op_i2))
+              intepreter_GPR_RV(15) = temp
             Case "E"                                                  ; Shift RV left by one. RV(15) is set to the value of the most significant bit of RV before the shift
               op_understood = #True
-              vx.a = intepreter_GPR_RV(Hex2Dec(op_i2))
-              intepreter_GPR_RV(15) = Bool((intepreter_GPR_RV(Hex2Dec(op_i2)) & %10000000) > 0)
+              If quirks = 0
+                intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2))
+              Else
+                intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i3))
+                EndIf
+              temp = intepreter_GPR_RV(Hex2Dec(op_i2))
+              intepreter_GPR_RV(Hex2Dec(op_i2)) = intepreter_GPR_RV(Hex2Dec(op_i2)) << 1
+              intepreter_GPR_RV(15) = Bool((temp & %10000000) > 0)
               
-              ! MOV AL, [p.v_vx]
-              ! SHL AL, 1
-              ! MOV byte [p.v_vx], AL
-              
-              intepreter_GPR_RV(Hex2Dec(op_i2)) = vx ; result
           EndSelect
           
         Case "9"                                                      ; Skip the next instruction if RV doesn't equal other RV
@@ -399,7 +393,11 @@ Procedure intepreter_NextOpcode()
           intepreter_SPR_I = Hex2Dec(op_i2+op_i3+op_i4)
         Case "B"                                                      ; Jump to an address plus RV(0)
           op_understood = #True
-          intepreter_SPR_PC = Hex2Dec(op_i2+op_i3+op_i4) + intepreter_GPR_RV(0)
+          If quirks = 0 
+             intepreter_SPR_PC = Hex2Dec(op_i2+op_i3+op_i4) + intepreter_GPR_RV(Hex2Dec(op_i2))
+          Else
+             intepreter_SPR_PC = Hex2Dec(op_i2+op_i3+op_i4) + intepreter_GPR_RV(0)
+          EndIf
           ; Don't go to next opcode
           intepreter_SkipOpcode = #True
         Case "C"                                                      ; Set RV to a random number and Value
@@ -408,8 +406,13 @@ Procedure intepreter_NextOpcode()
           intepreter_GPR_RV(Hex2Dec(op_i2)) = R
         Case "D"                                                      ; Draw pixel/sprite, RV(16) is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn't happen
           op_understood = #True
-          
+          If intepreter_SPR_DT.d > 0
+            intepreter_SPR_DT.d = intepreter_SPR_DT.d - 1
+          EndIf  
+            
           intepreter_GPR_RV(15)=0
+          cx = intepreter_GPR_RV(Hex2Dec(op_i2)) & (screen_pwidth -1)
+          cy = intepreter_GPR_RV(Hex2Dec(op_i3)) & (screen_pheight -1)
           
           If Hex2Dec(op_i4) = 0
             For y = 0 To 15
@@ -441,21 +444,16 @@ Procedure intepreter_NextOpcode()
               Next
             Next
           Else
-            For y = 0 To Hex2Dec(op_i4)-1
+            n = Min(Hex2Dec(op_i4) - 1, (screen_pheight -1) - cy)
+            For y = 0 To n
               ; Get Next binary line of the sprite in memory
               MI.l = intepreter_SPR_I + y
               Binary$ = RSet(Bin(memory_GetValue(MI)), 8, "0")
-              For x = 0 To 7
-                If Mid(Binary$, x+1, 1) = "1"
-                  draw_x.l = intepreter_GPR_RV(Hex2Dec(op_i2)) + x
-                  draw_y.l = intepreter_GPR_RV(Hex2Dec(op_i3)) + y
-                  
-                  While draw_x >= screen_pwidth
-                    draw_x - screen_pwidth
-                  Wend
-                  While draw_y >= screen_pheight
-                    draw_y - screen_pheight
-                  Wend
+              
+              For x = cx To Min(cx + 7, screen_pwidth -1)
+                If Mid(Binary$, x-cx+1, 1) = "1"
+                  draw_x.l = x
+                  draw_y.l = cy + y
                   
                   If screen_pixels( draw_x, draw_y ) = #Black
                     screen_pixels( draw_x, draw_y ) = #White
@@ -656,9 +654,9 @@ Procedure intepreter_NextOpcode()
                          ;This undocumented feature of the Chip-8 And used by Spacefight 2019! 
                          ;game.
                   If intepreter_SPR_I >= 4096
-                    intepreter_GPR_RV(15)=1
-                  Else
                     intepreter_GPR_RV(15)=0
+                  Else
+                    intepreter_GPR_RV(15)=1
                   EndIf
               EndSelect
               
@@ -699,6 +697,11 @@ Procedure intepreter_NextOpcode()
                   For i=0 To Hex2Dec(op_i2)
                     memory_SetValue(intepreter_SPR_I+i, intepreter_GPR_RV(i)) ; Change value in memory
                   Next
+                  If quirks = 0
+                    intepreter_SPR_I = intepreter_SPR_I
+                  Else 
+                    intepreter_SPR_I = intepreter_SPR_I + Hex2Dec(op_i2) -1
+                    EndIf
                   
               EndSelect
               
@@ -712,6 +715,11 @@ Procedure intepreter_NextOpcode()
                   For i=0 To Hex2Dec(op_i2)
                     intepreter_GPR_RV(i) = memory_GetValue(intepreter_SPR_I+i) ; Retreive value from memory
                   Next
+                  If quirks = 0
+                    intepreter_SPR_I = intepreter_SPR_I
+                  Else
+                    intepreter_SPR_I = intepreter_SPR_I + Hex2Dec(op_i2) -1
+                    EndIf
                   
               EndSelect
               
@@ -725,6 +733,7 @@ Procedure intepreter_NextOpcode()
                   For i=0 To Hex2Dec(op_i2)
                     memory_SetValue(240+i, intepreter_GPR_RV(i)) ; Change value in memory
                   Next
+                  
                     
               EndSelect
               
@@ -738,7 +747,7 @@ Procedure intepreter_NextOpcode()
                   For i=0 To Hex2Dec(op_i2)
                     intepreter_GPR_RV(i) = memory_GetValue(240+i) ; Retreive value from memory
                   Next
-                    
+                  
               EndSelect
               
           EndSelect
@@ -773,15 +782,6 @@ Procedure intepreter_NextOpcode()
 ;           intepreter_GPR_RV(i) - 256
 ;         Wend
 ;       Next
+  
       
-      
-    Else  
-      intepreter_SPR_DT.d = intepreter_SPR_DT.d - 0.1 ; Decrease delay timer
-    EndIf
-
 EndProcedure
-; IDE Options = PureBasic 5.31 (Windows - x86)
-; CursorPosition = 712
-; FirstLine = 675
-; Folding = -
-; EnableXP

@@ -31,70 +31,70 @@
 
 Procedure.c inputs_KeyPressed(code)
   ExamineKeyboard() ; Update keyboard values
-  
+
   Select code
     Case 0
-      If KeyboardPushed(#PB_Key_V)
+      If KeyboardPushed(#PB_Key_X)
         ProcedureReturn 1
       EndIf
     Case 1
-      If KeyboardPushed(#PB_Key_3)
+      If KeyboardPushed(#PB_Key_1)
         ProcedureReturn 1
       EndIf
     Case 2
-      If KeyboardPushed(#PB_Key_4)
+      If KeyboardPushed(#PB_Key_2)
         ProcedureReturn 1
       EndIf
     Case 3
-      If KeyboardPushed(#PB_Key_5)
+      If KeyboardPushed(#PB_Key_3)
         ProcedureReturn 1
       EndIf
     Case 4
-      If KeyboardPushed(#PB_Key_E)
+      If KeyboardPushed(#PB_Key_Q)
         ProcedureReturn 1
       EndIf
     Case 5
-      If KeyboardPushed(#PB_Key_R)
+      If KeyboardPushed(#PB_Key_W)
         ProcedureReturn 1
       EndIf
     Case 6
-      If KeyboardPushed(#PB_Key_T)
+      If KeyboardPushed(#PB_Key_E)
         ProcedureReturn 1
       EndIf
     Case 7
-      If KeyboardPushed(#PB_Key_D)
+      If KeyboardPushed(#PB_Key_A)
         ProcedureReturn 1
       EndIf
     Case 8
-      If KeyboardPushed(#PB_Key_F)
+      If KeyboardPushed(#PB_Key_S)
         ProcedureReturn 1
       EndIf
     Case 9
-      If KeyboardPushed(#PB_Key_G)
+      If KeyboardPushed(#PB_Key_D)
         ProcedureReturn 1
       EndIf
     Case 10
-      If KeyboardPushed(#PB_Key_C)
+      If KeyboardPushed(#PB_Key_Z)
         ProcedureReturn 1
       EndIf
     Case 11
-      If KeyboardPushed(#PB_Key_B)
+      If KeyboardPushed(#PB_Key_C)
         ProcedureReturn 1
       EndIf
     Case 12
-      If KeyboardPushed(#PB_Key_6)
+      If KeyboardPushed(#PB_Key_4)
         ProcedureReturn 1
       EndIf
     Case 13
-      If KeyboardPushed(#PB_Key_Y) Or KeyboardPushed(#PB_Key_Z) ; german keyboard
+      If KeyboardPushed(#PB_Key_R)
         ProcedureReturn 1
       EndIf
     Case 14
-      If KeyboardPushed(#PB_Key_H)
-        ProcedureReturn 1 
+      If KeyboardPushed(#PB_Key_F)
+        ProcedureReturn 1
       EndIf
     Case 15
-      If KeyboardPushed(#PB_Key_N)
+      If KeyboardPushed(#PB_Key_V)
         ProcedureReturn 1
       EndIf
     Case 16
@@ -102,65 +102,65 @@ Procedure.c inputs_KeyPressed(code)
         ProcedureReturn 1
       EndIf
   EndSelect
-  
+
   ProcedureReturn 0
 EndProcedure
 
 Procedure.c inputs_KeyFind() ; Tries to find a pressed key and returns it, chip8
   ExamineKeyboard() ; Update keyboard values
-  
-      If KeyboardPushed(#PB_Key_V)
+
+      If KeyboardPushed(#PB_Key_X)
         ProcedureReturn 0
       EndIf
-      If KeyboardPushed(#PB_Key_3)
+      If KeyboardPushed(#PB_Key_1)
         ProcedureReturn 1
       EndIf
-      If KeyboardPushed(#PB_Key_4)
+      If KeyboardPushed(#PB_Key_2)
         ProcedureReturn 2
       EndIf
-      If KeyboardPushed(#PB_Key_5)
+      If KeyboardPushed(#PB_Key_3)
         ProcedureReturn 3
       EndIf
-      If KeyboardPushed(#PB_Key_E)
+      If KeyboardPushed(#PB_Key_Q)
         ProcedureReturn 4
       EndIf
-      If KeyboardPushed(#PB_Key_R)
+      If KeyboardPushed(#PB_Key_W)
         ProcedureReturn 5
       EndIf
-      If KeyboardPushed(#PB_Key_T)
+      If KeyboardPushed(#PB_Key_E)
         ProcedureReturn 6
       EndIf
-      If KeyboardPushed(#PB_Key_D)
+      If KeyboardPushed(#PB_Key_A)
         ProcedureReturn 7
       EndIf
-      If KeyboardPushed(#PB_Key_F)
+      If KeyboardPushed(#PB_Key_S)
         ProcedureReturn 8
       EndIf
-      If KeyboardPushed(#PB_Key_G)
+      If KeyboardPushed(#PB_Key_D)
         ProcedureReturn 9
       EndIf
-      If KeyboardPushed(#PB_Key_C)
+      If KeyboardPushed(#PB_Key_Z)
         ProcedureReturn 10
       EndIf
-      If KeyboardPushed(#PB_Key_B)
+      If KeyboardPushed(#PB_Key_C)
         ProcedureReturn 11
       EndIf
-      If KeyboardPushed(#PB_Key_6)
+      If KeyboardPushed(#PB_Key_4)
         ProcedureReturn 12
       EndIf
-      If KeyboardPushed(#PB_Key_Y) Or KeyboardPushed(#PB_Key_Z) ; german keyboard
+      If KeyboardPushed(#PB_Key_R)
         ProcedureReturn 13
       EndIf
-      If KeyboardPushed(#PB_Key_H)
+      If KeyboardPushed(#PB_Key_F)
         ProcedureReturn 14
       EndIf
-      If KeyboardPushed(#PB_Key_N)
+      If KeyboardPushed(#PB_Key_V)
         ProcedureReturn 15
       EndIf
       If KeyboardPushed(#PB_Key_7)
         ProcedureReturn 16
       EndIf
-  
+
   ProcedureReturn 255
 EndProcedure
 ; IDE Options = PureBasic 4.51 (Windows - x86)
