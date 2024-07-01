@@ -1,13 +1,3 @@
-; -----------------------------------------------------------------------------------  ;
-;   ______  ______ _            _                                      _               ;
-;  / __   |/ __   | |          | |                     _              (_)              ;
-; | | //| | | //| | |      ____| | _   ___   ____ ____| |_  ___   ____ _  ____   ___   ;
-; | |// | | |// | | |     / _  | || \ / _ \ / ___) _  |  _)/ _ \ / ___) |/ _  ) /___)  ;
-; |  /__| |  /__| | |____( ( | | |_) ) |_| | |  ( ( | | |_| |_| | |   | ( (/ / |___ |  ;
-;  \_____/ \_____/|_______)_||_|____/ \___/|_|   \_||_|\___)___/|_|   |_|\____) (___/  ;
-;                                                                                      ;
-;  ----------------------------------------------------------------------------------  ;
-
 ;----------------------------------
 ;--  00SChip8 project              --
 ;----------------------------------
@@ -74,13 +64,14 @@ Enumeration
   #menu_speed_n2
   #menu_speed_n3
   #menu_speed_n4
-
+  #menu_vip
+  #menu_schip
   #menu_exit
   #menu_website
   #menu_about
 EndEnumeration
   
-If OpenWindow(#viewport_window, 100,100,  screen_width,screen_height, "00SChip8 - 00laboratories 2011-2016",  #PB_Window_SystemMenu | #PB_Window_MinimizeGadget | #PB_Window_TitleBar | #PB_Window_ScreenCentered | #PB_Window_SizeGadget | #PB_Window_MaximizeGadget )
+If OpenWindow(#viewport_window, 100,100,  screen_width,screen_height, "PureBas-C8",  #PB_Window_SystemMenu | #PB_Window_MinimizeGadget | #PB_Window_TitleBar | #PB_Window_ScreenCentered | #PB_Window_SizeGadget | #PB_Window_MaximizeGadget )
   If CreateMenu(#main_menu, WindowID(#viewport_window))
     MenuTitle("&File")
     MenuItem(#menu_open_rom_image, "Open ROM image...")
@@ -105,6 +96,11 @@ If OpenWindow(#viewport_window, 100,100,  screen_width,screen_height, "00SChip8 
     MenuItem(#menu_speed_7,"+7")
     MenuItem(#menu_speed_8,"+8")
     CloseSubMenu()
+    MenuTitle("Quirks")
+    MenuItem(#menu_vip,"CHIP-8 (VIP)")
+    MenuItem(#menu_schip,"SCHIP")
+    CloseSubMenu()
+    MenuBar()
     MenuTitle("&Help")
     MenuItem(#menu_website, "Website...")
     MenuItem(#menu_about, "About...")
@@ -212,7 +208,7 @@ Repeat
           EndIf
           
         Case #menu_about
-          MessageRequester("About 00SChip8","Copyright © 00laboratories 2011-2016"+Chr(13)+Chr(10)+"http://www.00laboratories.com/")
+          MessageRequester("About 00SChip8","Copyright Â© 00laboratories 2011-2016"+Chr(13)+Chr(10)+"http://www.00laboratories.com/")
           
         Case #menu_reset_game
           If tf$
@@ -230,6 +226,13 @@ Repeat
           
         Case #menu_website
           RunProgram("http://00laboratories.com/downloads/emulation/chip-8-emulator", "", "", #PB_Program_Wait)
+        ; -------------------
+        ; --- Extensions (quirks) ---
+        ; -------------------      
+        Case #menu_vip
+          quirks = 1 ; Set quirks to VIP CHIP-8 quirks.
+        Case #menu_schip
+          quirks = 0 ; Set quirks to SCHIP quirks.
         ; -------------------
         ; --- GAME SPEEDS ---
         ; -------------------
@@ -262,6 +265,8 @@ Repeat
       EndSelect
     EndIf
     
+    
+
   Until Event = 0
   
   ; -------------------------
@@ -346,7 +351,7 @@ DataSection
   BEEP:
     IncludeBinary "resources/beep.wav"
 EndDataSection
-; IDE Options = PureBasic 5.41 LTS (Windows - x86)
-; CursorPosition = 325
-; FirstLine = 290
+; IDE Options = PureBasic 6.04 LTS (Windows - x64)
+; CursorPosition = 332
+; FirstLine = 308
 ; EnableXP
